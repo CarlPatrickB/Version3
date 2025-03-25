@@ -1,605 +1,831 @@
-import React, { useState, useEffect } from 'react';
-const ProbatioForm = () => {
-    // État principal du formulaire - version simplifiée pour plus de concision
+
+import { useState, useEffect } from "react";
+
+export default function Home() {
+    // Main form state
     const [formData, setFormData] = useState({
-        // Section 1: Identification de l'interaction
-        callReason: '',
-        agentName: '',
-        interactionMode: '',
-        // Section 2: Identification du client
-        identityConfirmed: '',
-        infoConsentGiven: '',
-        consentRecorded: '',
-        // Section 3: Résumé de la requête
-        requestSummary: '',
+        primaryReason: "",
+        secondaryReason: "",
+        clientName: "",
+        interactionMode: "",
+        identityConfirmed: false,
+        collectionConsent: false,
+        recordedConsent: false,
+        requestSummary: "",
         clientNeeds: [],
-        clientNeedsOther: '',
-        specificExpectations: '',
-        requestUrgency: '',
-        // Section 4: Type de transaction
-        mainCategory: '',
-        autoOperations: [],
-        homeOperations: [],
-        transactionReason: '',
-        // Section 5: Analyse des besoins
-        needsQuestionnaire: '',
-        priorities: [],
-        specificCoverage: '',
-        situationChanges: [],
-        situationChangesOther: '',
-        needsAnalysis: '',
-        // Section 6: Aggravations de risques
-        riskFactors: [],
-        riskFactorsOther: '',
-        riskDetails: '',
-        riskInfoDisclosed: '',
-        riskExplained: '',
-        clientReaction: '',
-        // Section 7: Protections et garanties
-        protectionsOffered: [],
-        protectionsOther: '',
-        rejectedProtections: [],
-        rejectedProtectionsOther: '',
-        rejectionReason: '',
-        rejectionConsequences: '',
-        clientUnderstands: '',
-        confirmationMethod: '',
-        // Section 8: Renouvellement
-        lastRenewalDate: '',
-        needsReviewCompleted: '',
-        changesDescription: '',
-        recommendedChanges: '',
-        changesAccepted: '',
-        rejectedChanges: '',
-        reviewDocumented: '',
-        // Section 9: Particularités
-        notableElements: '',
-        clientInfo: '',
-        attentionPoints: '',
-        claimsHistory: '',
-        // Section 10: Recommandations
-        recommendations: '',
-        explainedLimitations: [],
-        limitationsOther: '',
-        exclusions: '',
-        clientUnderstandsExclusions: '',
-        understandingMethod: '',
-        // Section 11: Frais et rémunération
-        premiumType: [],
-        remunerationDisclosed: '',
-        remunerationType: '',
-        financialTiesDisclosed: '',
-        disclosureMethod: '',
-        // Section 12: Informations manquantes
-        missingInfo: [],
-        missingInfoOther: '',
-        missingInfoDetails: '',
-        missingInfoDeadline: '',
-        consequencesExplained: '',
-        reminderMethod: '',
-        // Section 13: Suivi
-        actions: [],
-        actionsOther: '',
-        followUpDate: '',
-        followUpPerson: '',
-        followUpDetails: '',
-        reminderSet: '',
-        // Section 14: Portail assureur
-        portalConsulted: '',
-        docsDownloaded: '',
-        docsIntegrated: '',
-        docTypes: [],
-        docTypesOther: '',
-        // Section 15: Conformité
-        compliance: [],
-        additionalComments: ''
+        clientExpectations: "",
+        requestUrgency: "",
+        vehicleInfo: "",
+        driversInfo: "",
+        vehicleUsage: "",
+        propertyAddress: "",
+        residenceType: "",
+        propertyCharacteristics: "",
+        transactionInfo: "",
+        transactionReason: "",
+        premiumImpact: "",
+        followUpActions: [],
+        followUpDate: "",
+        followUpResponsible: "",
+        followUpDetails: "",
+        autoReminder: false,
+        professionalConfirmation: [],
     });
-    // État pour la progression du formulaire
-    const [currentStep, setCurrentStep] = useState(1);
-    const [completedSteps, setCompletedSteps] = useState([]);
-    const [generatedNote, setGeneratedNote] = useState('');
-    // Options pour les différentes listes (version simplifiée)
-    const options = {
-        callReasons: ['Nouvelle soumission', 'Ajout/retrait véhicule', 'Modification de garanties', 'Renouvellement', 'Réclamation', 'Information générale', 'Autre'],
-        interactionModes: ['Téléphone', 'En personne', 'Courriel', 'Visioconférence'],
-        yesNo: ['Oui', 'Non'],
-        clientNeeds: ['Meilleure protection', 'Réduction de prime', 'Modification du bien assuré', 'Clarification des garanties', 'Autre'],
-        urgencies: ['Immédiate', 'Dans les 24h', 'Dans la semaine', 'Au renouvellement'],
-        categories: ['Automobile', 'Habitation', 'Entreprise', 'Autre'],
-        autoOperations: [
-            'Nouvelle soumission',
-            'Ajout de véhicule',
-            'Retrait de véhicule',
-            'Modification de véhicule',
-            'Ajout de conducteur',
-            'Retrait de conducteur',
-            'Modification d\'usage',
-            'Modification de garanties',
-            'Renouvellement'
-        ],
-        homeOperations: [
-            'Nouvelle soumission',
-            'Modification de résidence',
-            'Modification de garanties',
-            'Ajout de biens spécifiques',
-            'Retrait de biens spécifiques',
-            'Renouvellement'
-        ],
-        priorities: ['Protection étendue', 'Budget limité', 'Valeur à neuf', 'Couverture spécifique'],
-        changes: [
-            'Aucun changement',
-            'Changement d\'adresse',
-            'Acquisition de nouveaux biens',
-            'Changement de véhicule',
-            'Changement dans le profil des conducteurs',
-            'Rénovations',
-            'Développement d\'activités commerciales à domicile',
-            'Autre'
-        ],
-        autoRiskFactors: [
-            'Aucune aggravation identifiée',
-            'Conducteur novice',
-            'Suspension/révocation antérieure',
-            'Sinistres multiples',
-            'Infractions graves',
-            'Usage commercial non déclaré',
-            'Modifications non standards',
-            'Véhicule haute performance',
-            'Conducteur non résident',
-            'Zone à haut risque de vol',
-            'Autre'
-        ],
-        homeRiskFactors: [
-            'Aucune aggravation identifiée',
-            'Résidence secondaire/saisonnière',
-            'Bâtiment vacant >30 jours',
-            'Activité commerciale à domicile',
-            'Foyer au bois non certifié',
-            'Zone inondable',
-            'Toiture âgée',
-            'Système électrique désuet',
-            'Fréquence de sinistres',
-            'Biens de valeur sans protection',
-            'Animaux à risque',
-            'Autre'
-        ],
-        autoProtections: [
-            'Responsabilité civile',
-            'Collision et versement',
-            'Tous risques sauf collision',
-            'Valeur à neuf',
-            'Frais de déplacement',
-            'Responsabilité pour véhicules loués',
-            'Assurance de personnes',
-            'Assistance routière',
-            'TOUTES OFFERTES',
-            'N/A',
-            'Autres'
-        ],
-        homeProtections: [
-            'Formule tous risques',
-            'Formule risques désignés',
-            'Dégâts d\'eau',
-            'Inondation',
-            'Tremblement de terre',
-            'Valeur à neuf',
-            'Biens de valeur',
-            'Entreprises à domicile',
-            'TOUTES OFFERTES',
-            'N/A',
-            'Autres'
-        ],
-        limitations: [
-            'Exclusions standard',
-            'Garantie vol',
-            'Catastrophes naturelles',
-            'Dommages préexistants',
-            'Biens de valeur',
-            'Activités commerciales',
-            'Autres'
-        ],
-        confirmationMethods: ['Verbal', 'Écrit', 'Courriel', 'Signature électronique'],
-        premiumTypes: ['Prime mensuelle', 'Prime annuelle', 'Prime annuelle avec taxe'],
-        missingInfo: [
-            'Aucune information manquante',
-            'Permis de conduire',
-            'Historique de conduite',
-            'Preuves d\'absence de sinistres',
-            'Photos du bien',
-            'Évaluation professionnelle',
-            'Certificat d\'inspection',
-            'Inventaire des biens',
-            'Factures d\'achat',
-            'Autre'
-        ],
-        actions: [
-            'Rappeler le client',
-            'Envoyer documents par courriel',
-            'Envoyer documents par courrier',
-            'Attendre rappel du client',
-            'Contacter assureur précédent',
-            'Aucun suivi requis',
-            'Autre'
-        ],
-        docTypes: ['Police d\'assurance', 'Avenants', 'Correspondance', 'Autre'],
-        compliance: [
-            'Analyse des besoins effectuée',
-            'Conseils adaptés fournis',
-            'Exclusions expliquées',
-            'Rémunération divulguée',
-            'Questions répondues',
-            'Entretien documenté',
-            'Obligations déontologiques respectées'
-        ]
-    };
-    // Gestion des champs texte et select
+
+    // Visible sections based on selections
+    const [activeSections, setActiveSections] = useState({
+        identification: true,
+        identificationClient: true,
+        requete: false,
+        transaction: false,
+        vehicleDetails: false,
+        propertyDetails: false,
+        suivi: true,
+        conformite: true,
+    });
+
+    // Generated note state
+    const [generatedNote, setGeneratedNote] = useState("");
+
+    // Update visible sections when primary/secondary reason changes
+    useEffect(() => {
+        if (formData.primaryReason && formData.secondaryReason) {
+            // Auto submission/issue
+            if (formData.primaryReason === "soumissionAuto") {
+                setActiveSections({
+                    ...activeSections,
+                    requete: true,
+                    transaction: true,
+                    vehicleDetails: true,
+                    propertyDetails: false,
+                });
+            }
+            // Home submission/issue
+            else if (formData.primaryReason === "soumissionHab") {
+                setActiveSections({
+                    ...activeSections,
+                    requete: true,
+                    transaction: true,
+                    vehicleDetails: false,
+                    propertyDetails: true,
+                });
+            }
+            // Auto service
+            else if (formData.primaryReason === "serviceAuto") {
+                setActiveSections({
+                    ...activeSections,
+                    requete: true,
+                    transaction: true,
+                    vehicleDetails: true,
+                    propertyDetails: false,
+                });
+            }
+            // Home service
+            else if (formData.primaryReason === "serviceHab") {
+                setActiveSections({
+                    ...activeSections,
+                    requete: true,
+                    transaction: true,
+                    vehicleDetails: false,
+                    propertyDetails: true,
+                });
+            }
+            // Important note
+            else if (formData.primaryReason === "noteImportante") {
+                setActiveSections({
+                    ...activeSections,
+                    requete: true,
+                    transaction: true,
+                    vehicleDetails: false,
+                    propertyDetails: false,
+                });
+            }
+        }
+    }, [formData.primaryReason, formData.secondaryReason]);
+
+    // Generate note whenever form data changes
+    useEffect(() => {
+        generateNote();
+    }, [formData]);
+
+    // Handle input change
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const { name, value, type, checked } = e.target;
+        if (type === "checkbox") {
+            setFormData({ ...formData, [name]: checked });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
-    // Gestion des cases à cocher
-    const handleCheckboxChange = (e, category) => {
-        const { value, checked } = e.target;
-        if (checked) {
+
+    // Handle checkbox array changes (like clientNeeds)
+    const handleCheckboxArrayChange = (name, value, isChecked) => {
+        if (isChecked) {
             setFormData({
                 ...formData,
-                [category]: [...formData[category], value]
+                [name]: [...formData[name], value],
             });
         } else {
             setFormData({
                 ...formData,
-                [category]: formData[category].filter(item => item !== value)
+                [name]: formData[name].filter((item) => item !== value),
             });
         }
     };
-    // Fonction pour passer à l'étape suivante
-    const nextStep = (step) => {
-        if (!completedSteps.includes(step)) {
-            setCompletedSteps([...completedSteps, step]);
-        }
-        // Logique simplifiée pour déterminer l'étape suivante
-        let next = step + 1;
-        // Gérer les sections conditionnelles
-        if (step === 4 || step === 6 || step === 7) {
-            // Pour ces étapes, la logique conditionnelle serait ajoutée ici
-            // mais pour simplifier, on passe simplement à l'étape suivante
-        }
-        setCurrentStep(next);
+
+    // Reset form
+    const resetForm = () => {
+        setFormData({
+            primaryReason: "",
+            secondaryReason: "",
+            clientName: "",
+            interactionMode: "",
+            identityConfirmed: false,
+            collectionConsent: false,
+            recordedConsent: false,
+            requestSummary: "",
+            clientNeeds: [],
+            clientExpectations: "",
+            requestUrgency: "",
+            vehicleInfo: "",
+            driversInfo: "",
+            vehicleUsage: "",
+            propertyAddress: "",
+            residenceType: "",
+            propertyCharacteristics: "",
+            transactionInfo: "",
+            transactionReason: "",
+            premiumImpact: "",
+            followUpActions: [],
+            followUpDate: "",
+            followUpResponsible: "",
+            followUpDetails: "",
+            autoReminder: false,
+            professionalConfirmation: [],
+        });
+
+        setActiveSections({
+            identification: true,
+            identificationClient: true,
+            requete: false,
+            transaction: false,
+            vehicleDetails: false,
+            propertyDetails: false,
+            suivi: true,
+            conformite: true,
+        });
     };
-    // Fonction pour revenir à l'étape précédente
-    const prevStep = () => {
-        setCurrentStep(currentStep - 1);
+
+    // Copy note to clipboard
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(generatedNote);
+            alert("Note copiée dans le presse-papiers!");
+        } catch (error) {
+            alert("Échec de la copie. Veuillez réessayer ou copier manuellement.");
+        }
     };
-    // Générer la note en temps réel
-    useEffect(() => {
-        generateNote();
-    }, [formData, completedSteps]);
-    // Fonction pour générer la note
+
+    // Generate standardized note
     const generateNote = () => {
-        const date = new Date().toLocaleDateString('fr-FR');
-        let note = `PROBATIO - NOTES D'INTERACTION - ${date}\n\n`;
-        // Sections générées dynamiquement selon les étapes complétées
-        if (completedSteps.includes(1)) {
-            note += `1. IDENTIFICATION DE L'INTERACTION\n`;
-            note += ` • Raison de l'appel: ${formData.callReason}\n`;
-            note += ` • Nom de l'intervenant: ${formData.agentName}\n`;
-            note += ` • Mode d'interaction: ${formData.interactionMode}\n\n`;
+        if (!formData.primaryReason || !formData.clientName) {
+            setGeneratedNote(
+                "La note générée s'affichera ici. Complétez le formulaire pour générer une note."
+            );
+            return;
         }
-        if (completedSteps.includes(2)) {
-            note += `2. IDENTIFICATION DU CLIENT\n`;
-            note += ` • Confirmation d'identité: ${formData.identityConfirmed}\n`;
-            note += ` • Consentement à la collecte: ${formData.infoConsentGiven}\n`;
-            note += ` • Consentement enregistré: ${formData.consentRecorded}\n\n`;
+
+        // Format current date
+        const currentDate = new Date().toLocaleDateString("fr-FR");
+
+        // Get interaction mode label
+        let interactionModeLabel = "";
+        switch (formData.interactionMode) {
+            case "telephone":
+                interactionModeLabel = "Téléphone";
+                break;
+            case "enPersonne":
+                interactionModeLabel = "En personne";
+                break;
+            case "courriel":
+                interactionModeLabel = "Courriel";
+                break;
+            case "visioconference":
+                interactionModeLabel = "Visioconférence";
+                break;
+            case "clavardage":
+                interactionModeLabel = "Clavardage";
+                break;
+            default:
+                interactionModeLabel = formData.interactionMode;
         }
-        if (completedSteps.includes(3)) {
-            note += `3. RÉSUMÉ DE LA REQUÊTE\n`;
-            note += ` • Description: ${formData.requestSummary}\n`;
-            if (formData.clientNeeds.length > 0) {
-                note += ` • Besoins exprimés: ${formData.clientNeeds.join(', ')}\n`;
+
+        // Create client needs text
+        const clientNeedsLabels = {
+            meilleureProtection: "Meilleure protection",
+            reductionPrime: "Réduction de prime",
+            modificationBien: "Modification du bien assuré",
+            clarificationGaranties: "Clarification des garanties",
+            autre: "Autre",
+        };
+
+        const clientNeedsText = formData.clientNeeds
+            .map((need) => `- ${clientNeedsLabels[need] || need}`)
+            .join("\n");
+
+        // Build note title based on selected options
+        let noteTitle = "NOTE STANDARD";
+
+        if (formData.primaryReason === "soumissionAuto") {
+            noteTitle = "NOTE - SOUMISSION AUTOMOBILE";
+            if (formData.secondaryReason === "offreAuto") {
+                noteTitle += " (OFFRE)";
             }
-            note += ` • Attentes spécifiques: ${formData.specificExpectations}\n`;
-            note += ` • Urgence: ${formData.requestUrgency}\n\n`;
+        } else if (formData.primaryReason === "soumissionHab") {
+            noteTitle = "NOTE - SOUMISSION HABITATION";
+            if (formData.secondaryReason === "offreHab") {
+                noteTitle += " (OFFRE)";
+            }
+        } else if (formData.primaryReason === "serviceAuto") {
+            if (formData.secondaryReason === "changementAdresseAuto") {
+                noteTitle = "NOTE - CHANGEMENT D'ADRESSE (AUTOMOBILE)";
+            } else if (formData.secondaryReason === "ajoutVehicule") {
+                noteTitle = "NOTE - AJOUT D'UN VÉHICULE";
+            } else if (formData.secondaryReason === "supprVehicule") {
+                noteTitle = "NOTE - SUPPRESSION D'UN VÉHICULE";
+            } else if (formData.secondaryReason === "resiliationAuto") {
+                noteTitle = "NOTE - RÉSILIATION (AUTOMOBILE)";
+            } else if (formData.secondaryReason === "separationAuto") {
+                noteTitle = "NOTE - SÉPARATION (AUTOMOBILE)";
+            } else {
+                noteTitle = "NOTE - SERVICE AUTOMOBILE";
+            }
+        } else if (formData.primaryReason === "serviceHab") {
+            if (formData.secondaryReason === "changementAdresseHab") {
+                noteTitle = "NOTE - CHANGEMENT D'ADRESSE (HABITATION)";
+            } else if (formData.secondaryReason === "ajoutResidence") {
+                noteTitle = "NOTE - AJOUT D'UNE RÉSIDENCE";
+            } else if (formData.secondaryReason === "supprSituation") {
+                noteTitle = "NOTE - SUPPRESSION D'UNE SITUATION";
+            } else if (formData.secondaryReason === "resiliationHab") {
+                noteTitle = "NOTE - RÉSILIATION (HABITATION)";
+            } else if (formData.secondaryReason === "separationHab") {
+                noteTitle = "NOTE - SÉPARATION (HABITATION)";
+            } else {
+                noteTitle = "NOTE - SERVICE HABITATION";
+            }
+        } else if (formData.primaryReason === "noteImportante") {
+            if (formData.secondaryReason === "procuration") {
+                noteTitle = "NOTE IMPORTANTE - PROCURATION";
+            } else if (formData.secondaryReason === "refusAssurance") {
+                noteTitle = "NOTE IMPORTANTE - REFUS D'ASSURANCE";
+            } else {
+                noteTitle = "NOTE IMPORTANTE";
+            }
         }
-        // Autres sections seraient ajoutées ici de façon similaire
+
+        // Create client identity section
+        let clientIdentitySection = "";
+        if (
+            formData.identityConfirmed &&
+            formData.collectionConsent &&
+            formData.recordedConsent
+        ) {
+            clientIdentitySection =
+                "Confirmation d'identité du client effectuée. Le client a consenti à la collecte d'information et ce consentement a été enregistré au dossier.";
+        } else {
+            clientIdentitySection =
+                "ATTENTION: Confirmation d'identité ou consentements incomplets.";
+        }
+
+        // Create vehicle section if applicable
+        let vehicleSection = "";
+        if (activeSections.vehicleDetails && formData.vehicleInfo) {
+            const vehicleUsageLabels = {
+                plaisir: "Plaisir/Déplacements personnels",
+                travail: "Transport au travail",
+                commercial: "Usage commercial",
+                autre: "Autre",
+            };
+
+            vehicleSection = `
+DÉTAILS DU VÉHICULE:
+Véhicule concerné: ${formData.vehicleInfo}
+Conducteurs concernés: ${formData.driversInfo || "Non spécifié"}
+Utilisation principale: ${vehicleUsageLabels[formData.vehicleUsage] ||
+                formData.vehicleUsage ||
+                "Non spécifiée"
+                }`;
+        }
+
+        // Create property section if applicable
+        let propertySection = "";
+        if (activeSections.propertyDetails && formData.propertyAddress) {
+            const residenceTypeLabels = {
+                principale: "Principale",
+                secondaire: "Secondaire",
+                saisonniere: "Saisonnière",
+                locataire: "Locataire",
+                coproprietaire: "Copropriétaire",
+            };
+
+            propertySection = `
+DÉTAILS DE LA PROPRIÉTÉ:
+Adresse de la propriété: ${formData.propertyAddress}
+Type de résidence: ${residenceTypeLabels[formData.residenceType] ||
+                formData.residenceType ||
+                "Non spécifié"
+                }
+Caractéristiques particulières: ${formData.propertyCharacteristics ||
+                "Aucune caractéristique particulière"
+                }`;
+        }
+
+        // Create transaction section if applicable
+        let transactionSection = "";
+        if (
+            activeSections.transaction &&
+            (formData.transactionInfo ||
+                formData.transactionReason ||
+                formData.premiumImpact)
+        ) {
+            const premiumImpactLabels = {
+                augmentation: "Augmentation",
+                diminution: "Diminution",
+                neutre: "Neutre",
+                nonApplicable: "Non applicable",
+            };
+
+            transactionSection = `
+TRANSACTION:
+Information complémentaire: ${formData.transactionInfo || "Non spécifié"}
+Justification/motif: ${formData.transactionReason || "Non spécifié"}
+Impact sur la prime: ${premiumImpactLabels[formData.premiumImpact] ||
+                formData.premiumImpact ||
+                "Non spécifié"
+                }`;
+        }
+
+        // Create follow-up section
+        let followUpSection = "";
+        const followUpActionLabels = {
+            rappelerClient: "Rappeler le client",
+            envoyerDocsCourriel: "Envoyer documents par courriel",
+            envoyerDocsCourrier: "Envoyer documents par courrier",
+            attendreRappelClient: "Attendre rappel du client",
+            contacterAssureurPrecedent: "Contacter assureur précédent",
+            aucunSuivi: "Aucun suivi requis - dossier complet",
+        };
+
+        if (formData.followUpActions.includes("aucunSuivi")) {
+            followUpSection = `
+SUIVI REQUIS:
+Aucun suivi requis - dossier complet.`;
+        } else {
+            const followUpActionsText = formData.followUpActions
+                .map((action) => followUpActionLabels[action] || action)
+                .join(", ");
+
+            followUpSection = `
+SUIVI REQUIS:
+Actions requises: ${followUpActionsText || "Aucune action requise"}
+Date de suivi prévue: ${formData.followUpDate || "Non spécifiée"}
+Responsable du suivi: ${formData.followUpResponsible || "Non assigné"}
+Précisions: ${formData.followUpDetails || "Aucune précision"}
+Rappel automatique configuré: ${formData.autoReminder ? "Oui" : "Non"}`;
+        }
+
+        // Create professional declaration section
+        let professionalSection = "";
+        if (formData.professionalConfirmation.length > 0) {
+            const profConfirmationLabels = {
+                analyseBesoins: "Effectué une analyse sérieuse des besoins du client",
+                conseilsAdaptes: "Fourni des conseils adaptés à la situation du client",
+                exclusionsExpliquees:
+                    "Expliqué clairement les exclusions et limitations",
+                remunerationDivulguee: "Divulgué le mode de rémunération",
+                questionsRepondues: "Répondu à toutes les questions du client",
+                documentationComplete:
+                    "Documenté de façon précise et complète l'entretien",
+                deontologie: "Respecté toutes les obligations déontologiques",
+            };
+
+            const confirmationsText = formData.professionalConfirmation
+                .map((conf) => `- ${profConfirmationLabels[conf] || conf}`)
+                .join("\n");
+
+            professionalSection = `
+DÉCLARATION PROFESSIONNELLE:
+Le représentant confirme avoir:
+${confirmationsText}`;
+        }
+
+        // Compile the note
+        const note = `${noteTitle}
+
+Client: ${formData.clientName}
+Date: ${currentDate}
+Mode d'interaction: ${interactionModeLabel || "Non spécifié"}
+
+IDENTIFICATION DU CLIENT:
+${clientIdentitySection}
+
+RÉSUMÉ DE LA DEMANDE:
+${formData.requestSummary || "Non spécifié"}
+
+BESOINS EXPRIMÉS:
+${clientNeedsText || "Aucun besoin spécifique exprimé"}
+Attentes spécifiques: ${formData.clientExpectations || "Non spécifiées"}
+${vehicleSection}
+${propertySection}
+${transactionSection}
+${followUpSection}
+${professionalSection}`;
+
         setGeneratedNote(note);
     };
-    // Afficher une section complétée (format résumé)
-    const renderCompletedSection = (step, title, summary) => (
-        <div
-            className="p-3 bg-white rounded-lg shadow-sm mb-2 border-l-4 border-green-500
-cursor-pointer hover:bg-gray-50 transition-all"
-            onClick={() => setCurrentStep(step)}
-        >
-            <div className="flex justify-between items-center">
-                <h3 className="text-md font-medium text-gray-700">{title}</h3>
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1
-rounded-full">Complété</span>
-            </div>
-            <div className="text-sm text-gray-600 mt-1 truncate">{summary}</div>
-        </div>
-    );
-    // Composant réutilisable pour les groupes de cases à cocher
-    const CheckboxGroup = ({ options, category, values, onChange }) => (
-        <div className="grid grid-cols-2 gap-1 mt-1">
-            {options.map(option => (
-                <div key={option} className="flex items-start">
-                    <input
-                        type="checkbox"
-                        id={`${category}-${option}`}
-                        value={option}
-                        checked={values.includes(option)}
-                        onChange={(e) => onChange(e, category)}
-                        className="mt-1 mr-2"
-                    />
-                    <label htmlFor={`${category}-${option}`} className="text-sm">{option}</label>
-                </div>
-            ))}
-        </div>
-    );
-    // Boutons de navigation entre étapes
-    const NavigationButtons = () => (
-        <div className="flex justify-between mt-4">
-            <button
-                onClick={prevStep}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                disabled={currentStep === 1}
-            >
-                Retour
-            </button>
-            <button
-                onClick={() => nextStep(currentStep)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-                Continuer
-            </button>
-        </div>
-    );
-    // Fonction pour obtenir le résumé d'une section
-    const getSectionSummary = (step) => {
-        switch (step) {
-            case 1:
-                return `${formData.callReason} | ${formData.agentName}`;
-            case 2:
-                return `ID confirmée: ${formData.identityConfirmed} | Consentement:
-${formData.infoConsentGiven}`;
-            case 3:
-                return formData.requestSummary.substring(0, 50) + (formData.requestSummary.length >
-                    50 ? '...' : '');
-            // Autres cas seraient ajoutés de façon similaire
-            default:
-                return "Section complétée";
-        }
-    };
-    // Rendu de l'étape active
-    const renderCurrentStep = () => {
-        switch (currentStep) {
-            case 1:
-                return (
-                    <div className="p-4 bg-white rounded-lg shadow-md mb-4">
-                        <h2 className="text-lg font-semibold text-blue-700 mb-3">1. Identification de
-                            l'interaction</h2>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Raison de l'appel:</label>
-                            <select
-                                name="callReason"
-                                value={formData.callReason}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.callReasons.map(reason => (
-                                    <option key={reason} value={reason}>{reason}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Nom de l'intervenant:</label>
-                            <input
-                                type="text"
-                                name="agentName"
-                                value={formData.agentName}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Mode d'interaction:</label>
-                            <select
-                                name="interactionMode"
-                                value={formData.interactionMode}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.interactionModes.map(mode => (
-                                    <option key={mode} value={mode}>{mode}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <NavigationButtons />
-                    </div>
-                );
-            case 2:
-                return (
-                    <div className="p-4 bg-white rounded-lg shadow-md mb-4">
-                        <h2 className="text-lg font-semibold text-blue-700 mb-3">2. Identification du
-                            client</h2>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Confirmation d'identité
-                                effectuée:</label>
-                            <select
-                                name="identityConfirmed"
-                                value={formData.identityConfirmed}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.yesNo.map(option => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                            </select>
-                            <p className="text-xs text-gray-500 mt-1">*Obligatoire pour toute modification au
-                                dossier</p>
-                        </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Consentement à la collecte
-                                d'information:</label>
-                            <select
-                                name="infoConsentGiven"
-                                value={formData.infoConsentGiven}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.yesNo.map(option => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                            </select>
-                            <p className="text-xs text-gray-500 mt-1">*En cas de refus, expliquer les
-                                conséquences au client</p>
-                        </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Consentement enregistré au
-                                dossier:</label>
-                            <select
-                                name="consentRecorded"
-                                value={formData.consentRecorded}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.yesNo.map(option => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <NavigationButtons />
-                    </div>
-                );
-            case 3:
-                return (
-                    <div className="p-4 bg-white rounded-lg shadow-md mb-4">
-                        <h2 className="text-lg font-semibold text-blue-700 mb-3">3. Résumé de la
-                            requête</h2>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Description sommaire:</label>
-                            <textarea
-                                name="requestSummary"
-                                value={formData.requestSummary}
-                                onChange={handleInputChange}
-                                rows="3"
-                                className="w-full p-2 border rounded"
-                            ></textarea>
-                        </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Besoins exprimés par le
-                                client:</label>
-                            <CheckboxGroup
-                                options={options.clientNeeds}
-                                category="clientNeeds"
-                                values={formData.clientNeeds}
-                                onChange={handleCheckboxChange}
-                            />
-                            {formData.clientNeeds.includes('Autre') && (
+
+    return (
+        <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+            <h1 className="text-3xl font-bold text-center mb-6">PROBATIO</h1>
+            <h2 className="text-xl text-center mb-10">
+                Générateur de Notes Standardisées
+            </h2>
+
+            <div className="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
+                {/* Form Side */}
+                <div className="lg:w-1/2 bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold mb-4">Formulaire</h3>
+
+                    {/* Section 1: Identification */}
+                    <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                        <h4 className="text-lg font-medium mb-3">
+                            1. IDENTIFICATION DE L'INTERACTION
+                        </h4>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Raison d'appel principale:
+                                </label>
+                                <select
+                                    name="primaryReason"
+                                    value={formData.primaryReason}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-md"
+                                >
+                                    <option value="">Sélectionner</option>
+                                    <option value="soumissionAuto">
+                                        Soumission/Émission automobile
+                                    </option>
+                                    <option value="soumissionHab">
+                                        Soumission/Émission habitation
+                                    </option>
+                                    <option value="serviceAuto">
+                                        Service/Fidélisation automobile
+                                    </option>
+                                    <option value="serviceHab">
+                                        Service/Fidélisation habitation
+                                    </option>
+                                    <option value="noteImportante">Note importante</option>
+                                </select>
+                            </div>
+
+                            {formData.primaryReason && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Raison d'appel secondaire:
+                                    </label>
+                                    <select
+                                        name="secondaryReason"
+                                        value={formData.secondaryReason}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border rounded-md"
+                                    >
+                                        <option value="">Sélectionner</option>
+                                        {formData.primaryReason === "soumissionAuto" && (
+                                            <>
+                                                <option value="offreAuto">Offre</option>
+                                                <option value="autreAuto">Autre</option>
+                                            </>
+                                        )}
+                                        {formData.primaryReason === "soumissionHab" && (
+                                            <>
+                                                <option value="offreHab">Offre</option>
+                                                <option value="autreHab">Autre</option>
+                                            </>
+                                        )}
+                                        {formData.primaryReason === "serviceAuto" && (
+                                            <>
+                                                <option value="changementAdresseAuto">
+                                                    Changement d'adresse
+                                                </option>
+                                                <option value="ajoutVehicule">
+                                                    Ajout d'un véhicule
+                                                </option>
+                                                <option value="supprVehicule">
+                                                    Suppression d'un véhicule
+                                                </option>
+                                                <option value="resiliationAuto">Résiliation</option>
+                                                <option value="separationAuto">Séparation</option>
+                                            </>
+                                        )}
+                                        {formData.primaryReason === "serviceHab" && (
+                                            <>
+                                                <option value="changementAdresseHab">
+                                                    Changement d'adresse
+                                                </option>
+                                                <option value="ajoutResidence">
+                                                    Ajout d'une résidence
+                                                </option>
+                                                <option value="supprSituation">
+                                                    Suppression d'une situation
+                                                </option>
+                                                <option value="resiliationHab">Résiliation</option>
+                                                <option value="separationHab">Séparation</option>
+                                            </>
+                                        )}
+                                        {formData.primaryReason === "noteImportante" && (
+                                            <>
+                                                <option value="procuration">Procuration</option>
+                                                <option value="refusAssurance">
+                                                    Refus d'assurance
+                                                </option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nom du client:
+                                </label>
                                 <input
                                     type="text"
-                                    name="clientNeedsOther"
-                                    value={formData.clientNeedsOther}
+                                    name="clientName"
+                                    value={formData.clientName}
                                     onChange={handleInputChange}
-                                    placeholder="Précisez..."
-                                    className="w-full p-2 border rounded mt-2"
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Nom du client"
                                 />
-                            )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mode d'interaction:
+                                </label>
+                                <select
+                                    name="interactionMode"
+                                    value={formData.interactionMode}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-md"
+                                >
+                                    <option value="">Sélectionner</option>
+                                    <option value="telephone">Téléphone</option>
+                                    <option value="enPersonne">En personne</option>
+                                    <option value="courriel">Courriel</option>
+                                    <option value="visioconference">Visioconférence</option>
+                                    <option value="clavardage">Clavardage</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Attentes spécifiques du
-                                client:</label>
-                            <input
-                                type="text"
-                                name="specificExpectations"
-                                value={formData.specificExpectations}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
+                    </div>
+
+                    {/* Section 2: Identification du client */}
+                    <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                        <h4 className="text-lg font-medium mb-3">
+                            2. IDENTIFICATION DU CLIENT
+                        </h4>
+                        <div className="space-y-2">
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="identityConfirmed"
+                                    name="identityConfirmed"
+                                    checked={formData.identityConfirmed}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-blue-600"
+                                />
+                                <label
+                                    htmlFor="identityConfirmed"
+                                    className="ml-2 text-sm text-gray-700"
+                                >
+                                    Confirmation d'identité effectuée
+                                </label>
+                            </div>
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="collectionConsent"
+                                    name="collectionConsent"
+                                    checked={formData.collectionConsent}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-blue-600"
+                                />
+                                <label
+                                    htmlFor="collectionConsent"
+                                    className="ml-2 text-sm text-gray-700"
+                                >
+                                    Consentement à la collecte d'information
+                                </label>
+                            </div>
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="recordedConsent"
+                                    name="recordedConsent"
+                                    checked={formData.recordedConsent}
+                                    onChange={handleInputChange}
+                                    className="h-4 w-4 text-blue-600"
+                                />
+                                <label
+                                    htmlFor="recordedConsent"
+                                    className="ml-2 text-sm text-gray-700"
+                                >
+                                    Consentement enregistré au dossier
+                                </label>
+                            </div>
                         </div>
-                        <div className="mb-3">
-                            <label className="block text-sm font-medium mb-1">Urgence de la demande:</label>
-                            <select
-                                name="requestUrgency"
-                                value={formData.requestUrgency}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="">Sélectionner...</option>
-                                {options.urgencies.map(option => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                            </select>
+                    </div>
+
+                    {/* Section 3: Résumé de la requête */}
+                    {activeSections.requete && (
+                        <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                            <h4 className="text-lg font-medium mb-3">
+                                3. RÉSUMÉ DE LA REQUÊTE
+                            </h4>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Description sommaire:
+                                    </label>
+                                    <textarea
+                                        name="requestSummary"
+                                        value={formData.requestSummary}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border rounded-md h-24"
+                                        placeholder="Description de la requête du client..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Besoins exprimés par le client:
+                                    </label>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="need-meilleureProtection"
+                                                checked={formData.clientNeeds.includes(
+                                                    "meilleureProtection"
+                                                )}
+                                                onChange={(e) =>
+                                                    handleCheckboxArrayChange(
+                                                        "clientNeeds",
+                                                        "meilleureProtection",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                className="h-4 w-4 text-blue-600"
+                                            />
+                                            <label
+                                                htmlFor="need-meilleureProtection"
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                Meilleure protection
+                                            </label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="need-reductionPrime"
+                                                checked={formData.clientNeeds.includes(
+                                                    "reductionPrime"
+                                                )}
+                                                onChange={(e) =>
+                                                    handleCheckboxArrayChange(
+                                                        "clientNeeds",
+                                                        "reductionPrime",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                className="h-4 w-4 text-blue-600"
+                                            />
+                                            <label
+                                                htmlFor="need-reductionPrime"
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                Réduction de prime
+                                            </label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="need-modificationBien"
+                                                checked={formData.clientNeeds.includes(
+                                                    "modificationBien"
+                                                )}
+                                                onChange={(e) =>
+                                                    handleCheckboxArrayChange(
+                                                        "clientNeeds",
+                                                        "modificationBien",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                className="h-4 w-4 text-blue-600"
+                                            />
+                                            <label
+                                                htmlFor="need-modificationBien"
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                Modification du bien assuré
+                                            </label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="need-clarificationGaranties"
+                                                checked={formData.clientNeeds.includes(
+                                                    "clarificationGaranties"
+                                                )}
+                                                onChange={(e) =>
+                                                    handleCheckboxArrayChange(
+                                                        "clientNeeds",
+                                                        "clarificationGaranties",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                className="h-4 w-4 text-blue-600"
+                                            />
+                                            <label
+                                                htmlFor="need-clarificationGaranties"
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                Clarification des garanties
+                                            </label>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="need-autre"
+                                                checked={formData.clientNeeds.includes("autre")}
+                                                onChange={(e) =>
+                                                    handleCheckboxArrayChange(
+                                                        "clientNeeds",
+                                                        "autre",
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                className="h-4 w-4 text-blue-600"
+                                            />
+                                            <label
+                                                htmlFor="need-autre"
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                Autre
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <NavigationButtons />
-                    </div>
-                );
-            // Autres étapes...
-            default:
-                return (
-                    <div className="p-4 bg-white rounded-lg shadow-md mb-4 text-center">
-                        <h2 className="text-lg font-semibold text-blue-700 mb-3">Section en
-                            développement</h2>
-                        <p>Cette section sera bientôt disponible.</p>
-                        <NavigationButtons />
-                    </div>
-                );
-        }
-    };
-    return (
-        <div className="max-w-6xl mx-auto p-4">
-            <h1 className="text-xl font-bold text-center mb-6 text-blue-800">PROBATIO - Formulaire
-                Progressif</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Colonne gauche - Formulaire progressif */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-3">Formulaire</h2>
-                    {/* Sections complétées */}
-                    {completedSteps.map(step => {
-                        const titles = {
-                            1: "1. Identification de l'interaction",
-                            2: "2. Identification du client",
-                            3: "3. Résumé de la requête",
-                            4: "4. Type de transaction",
-                            5: "5. Analyse des besoins",
-                            6: "6. Aggravations de risques",
-                            7: "7. Protections et garanties",
-                            8: "8. Renouvellement",
-                            9: "9. Particularités pertinentes",
-                            10: "10. Recommandations",
-                            11: "11. Information sur les frais",
-                            12: "12. Informations manquantes",
-                            13: "13. Suivi",
-                            14: "14. Information du portail assureur",
-                            15: "15. Déclaration de conformité"
-                        };
-                        return renderCompletedSection(step, titles[step], getSectionSummary(step));
-                    })}
-                    {/* Section active */}
-                    {renderCurrentStep()}
-                </div>
-                {/* Colonne droite - Aperçu de la note générée */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-3">Aperçu de la note générée</h2>
-                    <div className="bg-white rounded-lg shadow-md p-4 h-[600px] overflow-y-auto">
-                        <pre className="text-sm font-mono whitespace-pre-wrap">{generatedNote}</pre>
-                    </div>
-                    <div className="mt-4 flex justify-end">
+                    )}
+
+                    {/* Buttons */}
+                    <div className="mt-6 flex justify-between">
                         <button
-                            onClick={() => navigator.clipboard.writeText(generatedNote)}
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            onClick={resetForm}
+                            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                         >
-                            Copier la note
+                            Réinitialiser
                         </button>
                     </div>
                 </div>
+
+                {/* Note Preview Side */}
+                <div className="lg:w-1/2">
+                    <div className="bg-gray-800 text-white rounded-lg shadow-md p-6 h-full flex flex-col">
+                        <h3 className="text-xl font-bold mb-4">
+                            Prévisualisation de la Note
+                        </h3>
+
+                        <div className="flex-grow p-4 bg-gray-700 rounded-md font-mono whitespace-pre-wrap overflow-y-auto text-sm">
+                            {generatedNote}
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={copyToClipboard}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                disabled={!generatedNote}
+                            >
+                                Copier la note
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
-};
-export default ProbatioForm;
+}
